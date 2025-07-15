@@ -3,17 +3,21 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug logging to check environment variables
+console.log("Supabase URL:", supabaseUrl);
+console.log("Supabase Anon Key exists:", !!supabaseAnonKey);
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Missing Supabase environment variables");
-  // Use placeholder values to prevent app crash
-  const placeholderUrl = "https://placeholder.supabase.co";
-  const placeholderKey = "placeholder-key";
+  console.error("Missing environment variables:", {
+    VITE_SUPABASE_URL: supabaseUrl,
+    VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? "[PRESENT]" : "[MISSING]",
+  });
+  throw new Error(
+    "Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.",
+  );
 }
 
-export const supabase = createClient(
-  supabaseUrl || "https://placeholder.supabase.co",
-  supabaseAnonKey || "placeholder-key",
-);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Auth helper functions
 export const authHelpers = {
@@ -39,11 +43,31 @@ export const authHelpers = {
   },
 
   signIn: async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { data, error };
+    try {
+      console.log("Attempting to sign in with email:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Supabase auth error:", error);
+      } else {
+        console.log("Sign in successful:", data.user?.email);
+      }
+
+      return { data, error };
+    } catch (err) {
+      console.error("Network or other error during sign in:", err);
+      return {
+        data: null,
+        error: {
+          message:
+            "Network error: Unable to connect to authentication service. Please check your internet connection and try again.",
+          name: "NetworkError",
+        },
+      };
+    }
   },
 
   signOut: async () => {

@@ -38,20 +38,29 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
     setError("");
     setSuccess("");
 
+    console.log("Login form submitted with email:", loginForm.email);
+
     try {
       const { data, error } = await authHelpers.signIn(
-        loginForm.email,
+        loginForm.email.trim(),
         loginForm.password,
       );
 
       if (error) {
-        setError(error.message);
+        console.error("Login error:", error);
+        setError(error.message || "Login failed. Please try again.");
       } else if (data.user) {
+        console.log("Login successful for user:", data.user.email);
         setSuccess("Login successful!");
         setTimeout(() => onAuthSuccess(), 1000);
+      } else {
+        setError("Login failed. No user data received.");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      console.error("Unexpected login error:", err);
+      setError(
+        "Network error: Unable to connect. Please check your internet connection and try again.",
+      );
     } finally {
       setIsLoading(false);
     }
