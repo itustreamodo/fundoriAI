@@ -13,24 +13,39 @@ function App() {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        if (!supabase) {
+          console.warn("Supabase not initialized, skipping auth check");
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error getting initial session:", error);
+        setUser(null);
+        setLoading(false);
+      }
     };
 
     getInitialSession();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Listen for auth changes only if supabase is available
+    if (supabase) {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
   const handleAuthSuccess = () => {

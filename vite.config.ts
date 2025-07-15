@@ -5,7 +5,6 @@ import { tempo } from "tempo-devtools/dist/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/",
   optimizeDeps: {
     entries: ["src/main.tsx", "src/tempobook/**/*"],
   },
@@ -19,5 +18,12 @@ export default defineConfig({
   server: {
     // @ts-ignore
     allowedHosts: true,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
   },
 });

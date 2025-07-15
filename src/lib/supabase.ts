@@ -12,12 +12,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
     VITE_SUPABASE_URL: supabaseUrl,
     VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? "[PRESENT]" : "[MISSING]",
   });
-  throw new Error(
-    "Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.",
-  );
+
+  // In production, don't throw error immediately - let the app render with fallback
+  if (import.meta.env.PROD) {
+    console.warn(
+      "Running in production mode with missing Supabase credentials. Authentication will not work.",
+    );
+  } else {
+    throw new Error(
+      "Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.",
+    );
+  }
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
 
 // Auth helper functions
 export const authHelpers = {
@@ -26,6 +37,17 @@ export const authHelpers = {
     password: string,
     userMetadata?: { firstName: string; lastName: string },
   ) => {
+    if (!supabase) {
+      return {
+        data: null,
+        error: {
+          message:
+            "Authentication service is not available. Please check your configuration.",
+          name: "ConfigurationError",
+        },
+      };
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -43,6 +65,17 @@ export const authHelpers = {
   },
 
   signIn: async (email: string, password: string) => {
+    if (!supabase) {
+      return {
+        data: null,
+        error: {
+          message:
+            "Authentication service is not available. Please check your configuration.",
+          name: "ConfigurationError",
+        },
+      };
+    }
+
     try {
       console.log("Attempting to sign in with email:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -71,11 +104,17 @@ export const authHelpers = {
   },
 
   signOut: async () => {
+    if (!supabase) {
+      return { error: null };
+    }
     const { error } = await supabase.auth.signOut();
     return { error };
   },
 
   getCurrentUser: async () => {
+    if (!supabase) {
+      return { user: null, error: null };
+    }
     const {
       data: { user },
       error,
@@ -84,6 +123,9 @@ export const authHelpers = {
   },
 
   getSession: async () => {
+    if (!supabase) {
+      return { session: null, error: null };
+    }
     const {
       data: { session },
       error,
