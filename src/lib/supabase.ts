@@ -4,25 +4,22 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Debug logging to check environment variables
-console.log("Supabase URL:", supabaseUrl);
-console.log("Supabase Anon Key exists:", !!supabaseAnonKey);
+if (!import.meta.env.PROD) {
+  console.log("Supabase URL:", supabaseUrl);
+  console.log("Supabase Anon Key exists:", !!supabaseAnonKey);
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("Missing environment variables:", {
-    VITE_SUPABASE_URL: supabaseUrl,
-    VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? "[PRESENT]" : "[MISSING]",
-  });
-
-  // In production, don't throw error immediately - let the app render with fallback
-  if (import.meta.env.PROD) {
-    console.warn(
-      "Running in production mode with missing Supabase credentials. Authentication will not work.",
-    );
-  } else {
-    throw new Error(
-      "Missing Supabase environment variables. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.",
-    );
+  if (!import.meta.env.PROD) {
+    console.error("Missing environment variables:", {
+      VITE_SUPABASE_URL: supabaseUrl,
+      VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? "[PRESENT]" : "[MISSING]",
+    });
   }
+
+  console.warn(
+    "Supabase credentials not configured. Authentication features will be disabled.",
+  );
 }
 
 export const supabase =
@@ -39,11 +36,11 @@ export const authHelpers = {
   ) => {
     if (!supabase) {
       return {
-        data: null,
+        data: { user: null, session: null },
         error: {
           message:
-            "Authentication service is not available. Please check your configuration.",
-          name: "ConfigurationError",
+            "Authentication is currently unavailable. Please try again later or contact support.",
+          name: "ServiceUnavailable",
         },
       };
     }
@@ -67,11 +64,11 @@ export const authHelpers = {
   signIn: async (email: string, password: string) => {
     if (!supabase) {
       return {
-        data: null,
+        data: { user: null, session: null },
         error: {
           message:
-            "Authentication service is not available. Please check your configuration.",
-          name: "ConfigurationError",
+            "Authentication is currently unavailable. Please try again later or contact support.",
+          name: "ServiceUnavailable",
         },
       };
     }
@@ -93,10 +90,10 @@ export const authHelpers = {
     } catch (err) {
       console.error("Network or other error during sign in:", err);
       return {
-        data: null,
+        data: { user: null, session: null },
         error: {
           message:
-            "Network error: Unable to connect to authentication service. Please check your internet connection and try again.",
+            "Unable to connect to authentication service. Please check your internet connection and try again.",
           name: "NetworkError",
         },
       };
@@ -115,21 +112,31 @@ export const authHelpers = {
     if (!supabase) {
       return { user: null, error: null };
     }
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-    return { user, error };
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+      return { user, error };
+    } catch (err) {
+      console.error("Error getting current user:", err);
+      return { user: null, error: null };
+    }
   },
 
   getSession: async () => {
     if (!supabase) {
       return { session: null, error: null };
     }
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.getSession();
-    return { session, error };
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      return { session, error };
+    } catch (err) {
+      console.error("Error getting session:", err);
+      return { session: null, error: null };
+    }
   },
 };
