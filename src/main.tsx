@@ -4,8 +4,16 @@ import App from "./App.tsx";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 
-import { TempoDevtools } from "tempo-devtools";
-TempoDevtools.init();
+// Initialize Tempo Devtools only in development
+if (import.meta.env.DEV) {
+  import("tempo-devtools")
+    .then(({ TempoDevtools }) => {
+      TempoDevtools.init();
+    })
+    .catch(() => {
+      console.log("Tempo devtools not available");
+    });
+}
 
 const basename = import.meta.env.BASE_URL;
 
