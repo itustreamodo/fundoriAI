@@ -107,26 +107,33 @@ const HomeContent = () => {
   ];
 
   return (
-    <div className="flex flex-col w-full h-full bg-black text-white p-4 pb-20">
-      <h2 className="text-2xl font-bold mb-6 text-green-500">Exam Resources</h2>
+    <div className="flex flex-col w-full h-full bg-transparent text-white p-4 pb-20">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+          Exam Resources
+        </h2>
+        <p className="text-zinc-400 text-sm">
+          Access past papers and study materials
+        </p>
+      </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="w-full mb-4 bg-zinc-900">
+        <TabsList className="w-full mb-6 bg-gradient-to-r from-zinc-800/50 to-zinc-900/50 backdrop-blur-sm border border-zinc-700/50 rounded-xl p-1">
           <TabsTrigger
             value="all"
-            className="flex-1 text-white data-[state=active]:bg-green-600 data-[state=active]:text-white"
+            className="flex-1 text-zinc-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg font-medium"
           >
             All Subjects
           </TabsTrigger>
           <TabsTrigger
             value="popular"
-            className="flex-1 text-white data-[state=active]:bg-green-600 data-[state=active]:text-white"
+            className="flex-1 text-zinc-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg font-medium"
           >
             Popular
           </TabsTrigger>
           <TabsTrigger
             value="recent"
-            className="flex-1 text-white data-[state=active]:bg-green-600 data-[state=active]:text-white"
+            className="flex-1 text-zinc-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 rounded-lg font-medium"
           >
             Recent
           </TabsTrigger>
@@ -136,11 +143,13 @@ const HomeContent = () => {
           {subjects.map((subject) => (
             <Card
               key={subject.id}
-              className="bg-zinc-900 border-zinc-800 text-white"
+              className="bg-gradient-to-br from-zinc-900/80 to-zinc-800/80 border border-zinc-700/50 text-white backdrop-blur-sm hover:border-green-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-green-500/10"
             >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-green-500">{subject.name}</CardTitle>
-                <CardDescription className="text-zinc-400">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl font-semibold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  {subject.name}
+                </CardTitle>
+                <CardDescription className="text-zinc-400 font-medium">
                   {subject.papers.length} papers available
                 </CardDescription>
               </CardHeader>
@@ -148,7 +157,7 @@ const HomeContent = () => {
                 {subject.papers.map((paper) => (
                   <div
                     key={paper.id}
-                    className="flex items-center justify-between p-2 rounded-md bg-zinc-800"
+                    className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-zinc-800/60 to-zinc-700/60 backdrop-blur-sm border border-zinc-600/30 hover:border-green-500/40 transition-all duration-200 hover:shadow-md"
                   >
                     <div className="flex items-center space-x-2">
                       <FileText className="h-5 w-5 text-zinc-400" />
@@ -170,14 +179,14 @@ const HomeContent = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="bg-transparent border-green-600 text-green-500 hover:bg-green-600 hover:text-white"
+                        className="bg-transparent border-green-500/60 text-green-400 hover:bg-green-600 hover:text-white hover:border-green-600 transition-all duration-200 font-medium"
                       >
                         <BookOpen className="h-4 w-4 mr-1" />
                         Memo
                       </Button>
                       <Button
                         size="sm"
-                        className="bg-green-600 text-white hover:bg-green-700"
+                        className="bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-green-500/25 transition-all duration-200 font-medium"
                       >
                         <Download className="h-4 w-4 mr-1" />
                         Paper
@@ -189,7 +198,7 @@ const HomeContent = () => {
               <CardFooter>
                 <Button
                   variant="ghost"
-                  className="w-full text-green-500 hover:text-green-400 hover:bg-zinc-800"
+                  className="w-full text-green-400 hover:text-green-300 hover:bg-gradient-to-r hover:from-zinc-800/50 hover:to-zinc-700/50 transition-all duration-200 font-medium"
                 >
                   View all {subject.name} papers
                 </Button>
@@ -223,7 +232,7 @@ const HomeContent = () => {
                     {popularPapers.map((paper) => (
                       <div
                         key={paper.id}
-                        className="flex items-center justify-between p-2 rounded-md bg-zinc-800"
+                        className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-zinc-800/60 to-zinc-700/60 backdrop-blur-sm border border-zinc-600/30 hover:border-green-500/40 transition-all duration-200 hover:shadow-md"
                       >
                         <div className="flex items-center space-x-2">
                           <FileText className="h-5 w-5 text-zinc-400" />
@@ -285,7 +294,9 @@ const HomeContent = () => {
                         <CardTitle className="text-green-500">
                           {subject.name}
                         </CardTitle>
-                        <Badge className="bg-green-600">New</Badge>
+                        <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg font-medium">
+                          New
+                        </Badge>
                       </div>
                       <CardDescription className="text-zinc-400">
                         {recentPapers.length} recent papers
@@ -295,7 +306,7 @@ const HomeContent = () => {
                       {recentPapers.map((paper) => (
                         <div
                           key={paper.id}
-                          className="flex items-center justify-between p-2 rounded-md bg-zinc-800"
+                          className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-zinc-800/60 to-zinc-700/60 backdrop-blur-sm border border-zinc-600/30 hover:border-green-500/40 transition-all duration-200 hover:shadow-md"
                         >
                           <div className="flex items-center space-x-2">
                             <FileText className="h-5 w-5 text-zinc-400" />
