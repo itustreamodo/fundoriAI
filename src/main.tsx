@@ -8,7 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 if (import.meta.env.DEV) {
   import("tempo-devtools")
     .then(({ TempoDevtools }) => {
-      TempoDevtools.init();
+      /* TempoDevtools.init() [deprecated] */;
     })
     .catch(() => {
       console.log("Tempo devtools not available");

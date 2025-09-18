@@ -38,7 +38,13 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
     setError("");
     setSuccess("");
 
-    console.log("Login form submitted with email:", loginForm.email);
+    console.log("=== LOGIN ATTEMPT START ===");
+    console.log("Email:", loginForm.email);
+    console.log("Password length:", loginForm.password.length);
+    console.log("Environment variables check:", {
+      hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
+      hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+    });
 
     try {
       const { data, error } = await authHelpers.signIn(
@@ -46,22 +52,35 @@ export default function LandingPage({ onAuthSuccess }: LandingPageProps) {
         loginForm.password,
       );
 
+      console.log("Auth response:", {
+        hasData: !!data,
+        hasUser: !!data?.user,
+        hasError: !!error,
+        errorMessage: error?.message,
+      });
+
       if (error) {
-        console.error("Login error:", error);
+        console.error("Login error details:", error);
         setError(error.message || "Login failed. Please try again.");
       } else if (data.user) {
         console.log("Login successful for user:", data.user.email);
         setSuccess("Login successful!");
         setTimeout(() => onAuthSuccess(), 1000);
       } else {
+        console.error("No user data received despite no error");
         setError("Login failed. No user data received.");
       }
-    } catch (err) {
-      console.error("Unexpected login error:", err);
+    } catch (err: any) {
+      console.error("Unexpected login error:", {
+        message: err.message,
+        name: err.name,
+        stack: err.stack,
+      });
       setError(
         "Network error: Unable to connect. Please check your internet connection and try again.",
       );
     } finally {
+      console.log("=== LOGIN ATTEMPT END ===");
       setIsLoading(false);
     }
   };

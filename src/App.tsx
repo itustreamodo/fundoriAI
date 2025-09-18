@@ -13,9 +13,16 @@ function App() {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
+      console.log("=== INITIAL SESSION CHECK START ===");
+      console.log("Supabase client available:", !!supabase);
+
       try {
         if (!supabase) {
           console.warn("Supabase not initialized, skipping auth check");
+          console.log("Environment variables:", {
+            url: import.meta.env.VITE_SUPABASE_URL ? "present" : "missing",
+            key: import.meta.env.VITE_SUPABASE_ANON_KEY ? "present" : "missing",
+          });
           setUser(null);
           setLoading(false);
           return;
@@ -24,13 +31,26 @@ function App() {
         const {
           data: { session },
         } = await supabase.auth.getSession();
+
+        console.log("Session check result:", {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userEmail: session?.user?.email,
+        });
+
         setUser(session?.user ?? null);
         setLoading(false);
-      } catch (error) {
-        console.error("Error getting initial session:", error);
+      } catch (error: any) {
+        console.error("Error getting initial session:", {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
         setUser(null);
         setLoading(false);
       }
+
+      console.log("=== INITIAL SESSION CHECK END ===");
     };
 
     getInitialSession();

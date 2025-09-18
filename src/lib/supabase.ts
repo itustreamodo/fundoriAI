@@ -4,22 +4,21 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Debug logging to check environment variables
-if (!import.meta.env.PROD) {
-  console.log("Supabase URL:", supabaseUrl);
-  console.log("Supabase Anon Key exists:", !!supabaseAnonKey);
-}
+console.log("Environment check:", {
+  isDev: !import.meta.env.PROD,
+  hasUrl: !!supabaseUrl,
+  hasKey: !!supabaseAnonKey,
+  url: supabaseUrl ? supabaseUrl.substring(0, 30) + "..." : "MISSING",
+});
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  if (!import.meta.env.PROD) {
-    console.error("Missing environment variables:", {
-      VITE_SUPABASE_URL: supabaseUrl,
-      VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? "[PRESENT]" : "[MISSING]",
-    });
-  }
-
-  console.warn(
-    "Supabase credentials not configured. Authentication features will be disabled.",
-  );
+  console.error("CRITICAL: Missing Supabase environment variables:", {
+    VITE_SUPABASE_URL: supabaseUrl ? "[PRESENT]" : "[MISSING]",
+    VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? "[PRESENT]" : "[MISSING]",
+    allEnvVars: Object.keys(import.meta.env).filter((key) =>
+      key.includes("SUPABASE"),
+    ),
+  });
 }
 
 export const supabase =
@@ -62,12 +61,15 @@ export const authHelpers = {
   },
 
   signIn: async (email: string, password: string) => {
+    console.log("SignIn attempt - Supabase client available:", !!supabase);
+
     if (!supabase) {
+      console.error("SignIn failed: Supabase client not initialized");
       return {
         data: { user: null, session: null },
         error: {
           message:
-            "Authentication is currently unavailable. Please try again later or contact support.",
+            "Authentication service is not properly configured. Please contact support.",
           name: "ServiceUnavailable",
         },
       };
@@ -76,24 +78,32 @@ export const authHelpers = {
     try {
       console.log("Attempting to sign in with email:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (error) {
-        console.error("Supabase auth error:", error);
+        console.error("Supabase auth error:", {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+        });
+        return { data, error };
       } else {
-        console.log("Sign in successful:", data.user?.email);
+        console.log("Sign in successful for:", data.user?.email);
+        return { data, error };
       }
-
-      return { data, error };
-    } catch (err) {
-      console.error("Network or other error during sign in:", err);
+    } catch (err: any) {
+      console.error("Network or other error during sign in:", {
+        message: err.message,
+        name: err.name,
+        stack: err.stack,
+      });
       return {
         data: { user: null, session: null },
         error: {
           message:
-            "Unable to connect to authentication service. Please check your internet connection and try again.",
+            "Network error: Unable to connect to authentication service. Please check your internet connection and try again.",
           name: "NetworkError",
         },
       };
